@@ -1,0 +1,6 @@
+*~
+*.pyc
+*.wpr
+*.wpu
+.coverage
+build
