@@ -13,6 +13,6 @@ $ python setup.py install
 Unit Tests
 ----------
 
-Unit tests are run from the ``test`` target in setup.py::
+Unit tests are run using nose (including coverage)::
 
-$ python setup.py test
+$ python setup.py nosetests

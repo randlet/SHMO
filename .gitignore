@@ -4,4 +4,5 @@
 *.wpu
 .coverage
 build
+dist
 *egg-info
