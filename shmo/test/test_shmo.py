@@ -8,20 +8,20 @@ class Test(unittest.TestCase):
     def setUp(self):
         #cyclopentane
         self.input_data = numpy.matrix("""
-             0 -1  0 -1  0; 
-            -1  0  0  0 -1; 
-             0  0  0 -1 -1; 
+             0 -1  0  0 -1; 
             -1  0 -1  0  0; 
-             0 -1 -1  0  0
+             0 -1  0 -1  0; 
+             0  0 -1  0 -1; 
+            -1  0  0 -1  0
         """, dtype=numpy.float)
         
         self.energies = numpy.array([-2., -0.618, -0.618, 1.618, 1.618])
         self.eigen_vectors = [
-            numpy.array([-0.4472, -0.4472, -0.4472, -0.4472, -0.4472]), #-2
-            numpy.array([ 0.6325,  0.1954, -0.5117,  0.1954, -0.5117]), #-0.618
-            numpy.array([ 0.0000,  0.6015, -0.3717, -0.6015,  0.3717]), #-0.618
-            numpy.array([ 0.0000, -0.3717, -0.6015,  0.3717,  0.6015]), #1.618       
-            numpy.array([-0.6325,  0.5117, -0.1954,  0.5117, -0.1954]), #1.618
+            numpy.array([-0.4472, -0.4472, -0.4472, -0.4472, -0.4472 ]), #-2
+            numpy.array([ 0.6325,  0.1954, -0.5117, -0.5117,  0.1954 ]), #-0.618
+            numpy.array([ 0.0000,  0.6015,  0.3717, -0.3717, -0.6015 ]), #-0.618
+            numpy.array([ 0.0000, -0.3717,  0.6015, -0.6015,  0.3717 ]), #1.618       
+            numpy.array([-0.6325,  0.5117, -0.1954, -0.1954,  0.5117 ]), #1.618
         ]
         
     #---------------------------------------------------------------------------
@@ -54,7 +54,13 @@ class Test(unittest.TestCase):
         
         for vec, expected_vec in zip(solver.eigen_vectors, self.eigen_vectors):
             for coef, expected_coef in zip(vec,expected_vec):
-                self.assertAlmostEqual(e, expected_e,places=4)
+                
+                self.assertAlmostEqual(coef, expected_coef,places=4)
+    #---------------------------------------------------------------------------
+    def test_degenerate(self):
+        solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
+        
+        #self.assertLi
 
 if __name__ == "__main__":
     unittest.main()            

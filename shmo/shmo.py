@@ -6,6 +6,13 @@ class HuckelSolver(object):
 
     #----------------------------------------------------------------------
     def __init__(self, data,num_electrons=None):
+        """solve the SHMO system for the input data matrix and number of electrons
+        Arguments:
+        data -- square input matrix representing bonds between atoms 
+        
+        Keyword Arguments:
+        num_electrons -- optional number of electrons for system.
+        """
 
         self.data = numpy.array(data,copy=True)
         
@@ -26,10 +33,16 @@ class HuckelSolver(object):
     def solve(self):
         """Recalculated all SHMO parameters"""
         
-        vals,vecs = numpy.linalg.eigh(self.data,'L')
+        vals,vecs = numpy.linalg.eigh(self.data,"L")
         
         self.energies = vals
         self.eigen_vectors = list(vecs.T)
+        self.energy_eigens = {}
+        
+        for e,vec in zip(self.energies,self.eigen_vectors):
+            vectors = self.energy_eigens.get(e,[])
+            vectors.append(vec)
+            self.energy_eigens[e] = vectors
         
         
         
