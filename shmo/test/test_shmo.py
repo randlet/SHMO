@@ -23,6 +23,7 @@ class Test(unittest.TestCase):
             numpy.array([ 0.0000, -0.3717,  0.6015, -0.6015,  0.3717 ]), #1.618       
             numpy.array([-0.6325,  0.5117, -0.1954, -0.1954,  0.5117 ]), #1.618
         ]
+        self.electron_count = [2,1.5,1.5,0,0]
         
     #---------------------------------------------------------------------------
     def test_invalid_input(self):
@@ -48,7 +49,7 @@ class Test(unittest.TestCase):
     def test_solver(self):
         
         solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
-        
+        self.assertEqual(len(solver.energy_eigens.keys()),3)
         for e, expected_e in zip(solver.energies,self.energies):
             self.assertAlmostEqual(e, expected_e,places=3)
         
@@ -57,10 +58,11 @@ class Test(unittest.TestCase):
                 
                 self.assertAlmostEqual(coef, expected_coef,places=4)
     #---------------------------------------------------------------------------
-    def test_degenerate(self):
+    def test_population(self):
         solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
-        
-        #self.assertLi
+        electron_counts = [x.num_electrons for x in solver.populated_levels]
+        self.assertListEqual(self.electron_count,electron_counts)
+
 
 if __name__ == "__main__":
     unittest.main()            
