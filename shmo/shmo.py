@@ -51,6 +51,7 @@ class HuckelSolver(object):
         """Recalculate all SHMO parameters"""
         self._solve_eigens()
         self._populate_levels()
+        self._calc_bond_orders()
         
     #---------------------------------------------------------------------------
     def _solve_eigens(self):
@@ -83,3 +84,13 @@ class HuckelSolver(object):
             for eigenvec in eigenvecs:
                 populated_level = PopulatedLevel(energy=energy,eigen_vector=eigenvec,num_electrons=electrons_per_degen_level)
                 self.populated_levels.append(populated_level)
+    #---------------------------------------------------------------------------
+    def _calc_bond_orders(self):
+        """calculate pi bond orders for system"""
+        size = self.data.shape[0]
+        self.bond_orders = numpy.mat(numpy.zeros((size,size),numpy.float))
+        for ii in range(size):
+            for jj in range(ii,size):
+                bond_order = sum(ne*ev[ii]*ev[jj] for (e,ev,ne) in self.populated_levels)
+                self.bond_orders[ii,jj] = bond_order
+                self.bond_orders[jj,ii] = bond_order

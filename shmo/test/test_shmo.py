@@ -1,7 +1,7 @@
 import numpy
 import shmo
 import unittest
-
+TEST_PRECISION = 4
 #====================================================================================
 class Test(unittest.TestCase):
     #---------------------------------------------------------------------------
@@ -24,6 +24,14 @@ class Test(unittest.TestCase):
             numpy.array([-0.6325,  0.5117, -0.1954, -0.1954,  0.5117 ]), #1.618
         ]
         self.electron_count = [2,1.5,1.5,0,0]
+        
+        self.pi_bond_orders = numpy.matrix("""
+             1.00000  0.58540 -0.08541 -0.08541  0.58540; 
+             0.58540  1.00000  0.58540 -0.08541 -0.08541;
+            -0.08541  0.58540  1.00000  0.58540 -0.08541;
+            -0.08541 -0.08541  0.58540  1.00000  0.58540;
+             0.58540 -0.08541 -0.08541  0.58540  1.00000
+        """, dtype=numpy.float)
         
     #---------------------------------------------------------------------------
     def test_invalid_input(self):
@@ -51,18 +59,30 @@ class Test(unittest.TestCase):
         solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
         self.assertEqual(len(solver.energy_eigens.keys()),3)
         for e, expected_e in zip(solver.energies,self.energies):
-            self.assertAlmostEqual(e, expected_e,places=3)
+            self.assertAlmostEqual(e, expected_e,places=TEST_PRECISION)
         
         for vec, expected_vec in zip(solver.eigen_vectors, self.eigen_vectors):
             for coef, expected_coef in zip(vec,expected_vec):
                 
-                self.assertAlmostEqual(coef, expected_coef,places=4)
+                self.assertAlmostEqual(coef, expected_coef,places=TEST_PRECISION)
     #---------------------------------------------------------------------------
     def test_population(self):
         solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
         electron_counts = [x.num_electrons for x in solver.populated_levels]
         self.assertListEqual(self.electron_count,electron_counts)
-
+        solver.set_data(self.input_data,num_electrons=6)
+        electron_counts = [x.num_electrons for x in solver.populated_levels]
+        
+        self.assertListEqual([2,2,2,0,0],electron_counts)
+    #---------------------------------------------------------------------------
+    def test_bond_orders(self):
+        solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
+        
+        size = solver.data.shape[0]
+        
+        for ii in range(size):
+            for jj in range(size):
+                self.assertAlmostEqual(solver.bond_orders[ii,jj],self.pi_bond_orders[ii,jj],places=TEST_PRECISION)
 
 if __name__ == "__main__":
     unittest.main()            
