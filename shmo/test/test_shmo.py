@@ -83,6 +83,21 @@ class Test(unittest.TestCase):
         for ii in range(size):
             for jj in range(size):
                 self.assertAlmostEqual(solver.bond_orders[ii,jj],self.pi_bond_orders[ii,jj],places=TEST_PRECISION)
+    #---------------------------------------------------------------------------
+    def test_net_charges(self):
+        solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
+        for x in solver.net_charges:
+            self.assertAlmostEqual(0,x,places=TEST_PRECISION)
 
+        for x in solver.charge_densities:
+            self.assertAlmostEqual(-1,x,places=TEST_PRECISION)
+            
+        solver.set_data(data=self.input_data,num_electrons=6)
+        for x in solver.charge_densities:
+            self.assertAlmostEqual(-1.2,x)
+        for x in solver.net_charges:
+            self.assertAlmostEqual(-0.2,x,places=TEST_PRECISION)
+            
+        
 if __name__ == "__main__":
     unittest.main()            

@@ -52,6 +52,7 @@ class HuckelSolver(object):
         self._solve_eigens()
         self._populate_levels()
         self._calc_bond_orders()
+        self._calc_charges()
         
     #---------------------------------------------------------------------------
     def _solve_eigens(self):
@@ -94,3 +95,11 @@ class HuckelSolver(object):
                 bond_order = sum(ne*ev[ii]*ev[jj] for (e,ev,ne) in self.populated_levels)
                 self.bond_orders[ii,jj] = bond_order
                 self.bond_orders[jj,ii] = bond_order
+    #---------------------------------------------------------------------------
+    def _calc_charges(self):
+        """calculate net charge per atom"""
+        size = self.data.shape[0]
+        self.net_charges =  numpy.zeros(size,dtype=float)
+        if self.bond_orders.any():
+            self.net_charges = numpy.array([1. - self.bond_orders[ii,ii] for ii in range(size)])
+        self.charge_densities = self.net_charges - 1. 
