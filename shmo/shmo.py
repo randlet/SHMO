@@ -71,6 +71,7 @@ class HuckelSolver(object):
             vectors = self.energy_eigens.get(e,[])
             vectors.append(vec)
             self.energy_eigens[e] = vectors
+            
     #---------------------------------------------------------------------------
     def _populate_levels(self):
         """set electron population of each energy level"""
@@ -87,6 +88,7 @@ class HuckelSolver(object):
             for eigenvec in eigenvecs:
                 populated_level = PopulatedLevel(energy=energy,eigen_vector=eigenvec,num_electrons=electrons_per_degen_level)
                 self.populated_levels.append(populated_level)
+                
     #---------------------------------------------------------------------------
     def _calc_bond_orders(self):
         """calculate pi bond orders for system"""
@@ -97,6 +99,7 @@ class HuckelSolver(object):
                 bond_order = sum(ne*ev[ii]*ev[jj] for (e,ev,ne) in self.populated_levels)
                 self.bond_orders[ii,jj] = bond_order
                 self.bond_orders[jj,ii] = bond_order
+                
     #---------------------------------------------------------------------------
     def _calc_charges(self):
         """calculate net charge per atom"""
@@ -105,9 +108,12 @@ class HuckelSolver(object):
         if self.bond_orders.any():
             self.net_charges = numpy.array([1. - self.bond_orders[ii,ii] for ii in range(size)])
         self.charge_densities = self.net_charges - 1.
+        
     #----------------------------------------------------------------------
     def num_doubly_occupied_orbitals(self):
+        """return number of orbitals with exactly 2 electrons"""
         return sum(1 for l in self.populated_levels if abs(2.-l.num_electrons) < EPSILON)
+    
     #----------------------------------------------------------------------
     def _calc_aa_polarizability(self):
         """Atom-Atom polarizabilities fom Computing methods in quantum organic chemistry - Greenwood: pg 54"""
@@ -129,10 +135,12 @@ class HuckelSolver(object):
                 self.aa_polar[uu,rr] = aap
 
         self.aa_polar *= 4.
+        
     #----------------------------------------------------------------------
     def bond_pairs(self):
         """return a list of 2-tuples (m,n) representing bonds between atom pairs m & n""" 
         return sorted(set(map(lambda x: tuple(sorted(x)),zip(*numpy.where(numpy.asarray(self.data)!=0)))))
+    
     #----------------------------------------------------------------------
     def _calc_ab_polarizability(self):
         """Atom-Bond polarizabilities fom Computing methods in quantum organic chemistry - Greenwood: pg 46 eq 3-16"""        
