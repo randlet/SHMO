@@ -53,6 +53,7 @@ class HuckelSolver(object):
         self._populate_levels()
         self._calc_bond_orders()
         self._calc_charges()
+        self._calc_aa_polarizability()
         
     #---------------------------------------------------------------------------
     def _solve_eigens(self):
@@ -102,4 +103,28 @@ class HuckelSolver(object):
         self.net_charges =  numpy.zeros(size,dtype=float)
         if self.bond_orders.any():
             self.net_charges = numpy.array([1. - self.bond_orders[ii,ii] for ii in range(size)])
-        self.charge_densities = self.net_charges - 1. 
+        self.charge_densities = self.net_charges - 1.
+    #----------------------------------------------------------------------
+    def num_doubly_occupied_orbitals(self):
+        return sum(1 for l in self.populated_levels if abs(2.-l.num_electrons) < EPSILON)
+    #----------------------------------------------------------------------
+    def _calc_aa_polarizability(self):
+        """Atom-Atom polarizabilities fom Computing methods in quantum organic chemistry - Greenwood: pg 54"""
+        size = self.data.shape[0]
+        self.aa_polar = numpy.mat(numpy.zeros((size,size),float))
+        
+        n_dbl = self.num_doubly_occupied_orbitals()
+        evals = self.energies
+        evecs = self.eigen_vectors
+        
+        for rr in range(size):
+            for uu in range(rr+1):                
+                aap = 0.                
+                for jj in range(n_dbl):
+                    tmp = sum(evecs[kk][rr]*evecs[kk][uu]/(evals[jj]-evals[kk]) for kk in range(n_dbl,size))
+                    aap += evecs[jj][rr]*evecs[jj][uu]*tmp
+                    
+                self.aa_polar[rr,uu] = aap
+                self.aa_polar[uu,rr] = aap
+
+        self.aa_polar *= 4.

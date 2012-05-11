@@ -97,7 +97,37 @@ class Test(unittest.TestCase):
             self.assertAlmostEqual(-1.2,x)
         for x in solver.net_charges:
             self.assertAlmostEqual(-0.2,x,places=TEST_PRECISION)
+    #---------------------------------------------------------------------------
+    def test_aa_polarizability(self):
+        """"""
+        solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
+
+        aa1 = numpy.matrix("""
+            -0.32  0.00  0.16  0.16  0.00;
+             0.00 -0.32  0.00  0.16  0.16;
+             0.16  0.00 -0.32  0.00  0.16;
+             0.16  0.16  0.00 -0.32  0.00;
+             0.00  0.16  0.16  0.00 -0.32""", 
+            dtype=float
+        )
+        
+        aa2 = numpy.matrix("""
+            -0.3747   0.1431   0.04422  0.04422  0.1431;
+             0.1431  -0.3747   0.1431   0.04422  0.04422;
+             0.04422  0.1431  -0.3747   0.1431   0.04422;
+             0.04422  0.04422  0.1431  -0.3747   0.1431;
+             0.1431   0.04422  0.04422  0.1431  -0.3747
+        """, dtype=float)
+        
+        for ne,aa in [(5,aa1),(7,aa2)]:
+            solver = shmo.HuckelSolver(data=self.input_data,num_electrons=ne)
             
+            for ii in range(aa.shape[0]):
+                for jj in range(aa.shape[0]):
+                    self.assertAlmostEqual(aa[ii,jj],solver.aa_polar[ii,jj],places=4)
+                                        
+    
+        
         
 if __name__ == "__main__":
     unittest.main()            
