@@ -99,8 +99,6 @@ class Test(unittest.TestCase):
             self.assertAlmostEqual(-0.2,x,places=TEST_PRECISION)
     #---------------------------------------------------------------------------
     def test_aa_polarizability(self):
-        """"""
-        solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
 
         aa1 = numpy.matrix("""
             -0.32  0.00  0.16  0.16  0.00;
@@ -126,8 +124,53 @@ class Test(unittest.TestCase):
                 for jj in range(aa.shape[0]):
                     self.assertAlmostEqual(aa[ii,jj],solver.aa_polar[ii,jj],places=4)
                                         
-    
+    #---------------------------------------------------------------------------
+    def test_ab_polarizability(self):
+        """"""
+        ab1 = numpy.matrix("""
+            -0.16  0.08  0.16 -0.16  0.08;
+            -0.16 -0.16  0.08  0.08  0.16;
+             0.08 -0.16 -0.16  0.16  0.08;
+             0.16  0.08 -0.16  0.08 -0.16;
+             0.08  0.16  0.08 -0.16 -0.16
+        """, dtype=float)
         
+        ab2 = numpy.matrix("""
+             0.06311 -0.08522  0.04422  0.06311 -0.08522;
+             0.06311  0.06311 -0.08522 -0.08522  0.04422;
+            -0.08522  0.06311  0.06311  0.04422 -0.08522;
+             0.04422 -0.08522  0.06311 -0.08522  0.06311;
+            -0.08522  0.04422 -0.08522  0.06311  0.06311        
+        """, dtype=float)
+        
+        solver = shmo.HuckelSolver(data=self.input_data,num_electrons=5)
+        bond_pairs = solver.bond_pairs()
+        self.assertListEqual(bond_pairs,[(0, 1), (0, 4), (1, 2), (2, 3), (3, 4)])
+        ab1 = [
+            [-0.16, -0.16,  0.08,  0.16,  0.08],
+            [-0.16,  0.08, -0.16,  0.08,  0.16],            
+            [ 0.08,  0.16, -0.16, -0.16,  0.08],
+            [ 0.16,  0.08,  0.08, -0.16, -0.16],
+            [ 0.08, -0.16,  0.16,  0.08, -0.16],
+        ]
+        ab1 = map(lambda x: zip(bond_pairs,x),ab1)
+        
+        ab2 = [
+            [ 0.06311,  0.06311, -0.08522,  0.04422, -0.08522],
+            [ 0.06311, -0.08522,  0.06311, -0.08522,  0.04422],
+            [-0.08522,  0.04422,  0.06311,  0.06311, -0.08522],
+            [ 0.04422, -0.08522, -0.08522,  0.06311,  0.06311],
+            [-0.08522,  0.06311,  0.04422, -0.08522,  0.06311]
+        
+        ]
+        ab2 = map(lambda x: zip(bond_pairs,x),ab2)
+        for ne,ab in [(5,ab1),(7,ab2)]:
+            solver = shmo.HuckelSolver(data=self.input_data,num_electrons=ne)
+            for atom in range(len(ab)):
+                for ii,(bond_pair1, p1) in enumerate(ab[atom]):
+                    bond_pair2, p2 = solver.ab_polar[atom][ii]
+                    self.assertEqual(bond_pair1,bond_pair2)
+                    self.assertAlmostEqual(p1,p2,places=TEST_PRECISION)
         
 if __name__ == "__main__":
     unittest.main()            

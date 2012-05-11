@@ -54,6 +54,7 @@ class HuckelSolver(object):
         self._calc_bond_orders()
         self._calc_charges()
         self._calc_aa_polarizability()
+        self._calc_ab_polarizability()
         
     #---------------------------------------------------------------------------
     def _solve_eigens(self):
@@ -128,3 +129,39 @@ class HuckelSolver(object):
                 self.aa_polar[uu,rr] = aap
 
         self.aa_polar *= 4.
+    #----------------------------------------------------------------------
+    def bond_pairs(self):
+        """return a list of 2-tuples (m,n) representing bonds between atom pairs m & n""" 
+        return sorted(set(map(lambda x: tuple(sorted(x)),zip(*numpy.where(numpy.asarray(self.data)!=0)))))
+    #----------------------------------------------------------------------
+    def _calc_ab_polarizability(self):
+        """Atom-Bond polarizabilities fom Computing methods in quantum organic chemistry - Greenwood: pg 46 eq 3-16"""        
+        self.ab_polar = [self._calc_single_ab(x) for x in  range(self.data.shape[0])]
+
+    #----------------------------------------------------------------------
+    def _calc_single_ab(self,uu):
+
+        n_dbl = self.num_doubly_occupied_orbitals()
+        n_dbl_rng = range(n_dbl)
+        n_dbl_sz_rng = range(n_dbl,self.data.shape[0])
+
+        evecs = self.eigen_vectors
+        evals = self.energies
+        
+        ab_polar = []
+                
+        for ss,tt in self.bond_pairs():
+                
+            abp = 0.
+            for jj in n_dbl_rng:
+                c_uj = evecs[jj][uu]
+                c_sj,c_tj = evecs[jj][ss],evecs[jj][tt]
+                
+                if abs(c_uj)>EPSILON and (abs(c_sj)>EPSILON or abs(c_tj)>EPSILON):                    
+                    tmp = [evecs[kk][uu]*(c_sj*evecs[kk][tt] + c_tj*evecs[kk][ss])/(evals[jj]-evals[kk]) for kk in n_dbl_sz_rng if abs(evecs[kk][uu]) > EPSILON]                            
+                    abp += c_uj*sum(tmp)
+
+            ab_polar.append(((ss,tt),2*abp))
+        return ab_polar
+
+        
