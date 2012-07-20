@@ -41,11 +41,14 @@ class HuckelSolver(object):
         if num_electrons is None:
             self.num_electrons = self.data.shape[0]
         
-        if not (0 < self.num_electrons <= self.data.shape[0]*2):
+        if not (0 <= self.num_electrons <= self.data.shape[0]*2):
             raise ValueError("Number of electrons must be greater than zero and less than 2*number of atoms")
     
         self._solve()
-        
+    #---------------------------------------------------------------------------
+    def set_num_electrons(self,num_electons):
+        """convenience method to update number of electrons for system"""
+        self.set_data(self.data,num_electons=num_electons)
     #---------------------------------------------------------------------------
     def _solve(self):
         """Recalculate all SHMO parameters"""
@@ -112,7 +115,7 @@ class HuckelSolver(object):
     #----------------------------------------------------------------------
     def num_doubly_occupied_orbitals(self):
         """return number of orbitals with exactly 2 electrons"""
-        return sum(1 for l in self.populated_levels if abs(2.-l.num_electrons) < EPSILON)
+        return sum(1 for lvl in self.populated_levels if abs(2.-lvl.num_electrons) < EPSILON)
     
     #----------------------------------------------------------------------
     def _calc_aa_polarizability(self):

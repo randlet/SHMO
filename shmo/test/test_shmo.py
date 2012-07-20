@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
     def test_too_few_electrons(self):
         
         with self.assertRaises(ValueError):
-            shmo.HuckelSolver(self.input_data,num_electrons=0)
+            shmo.HuckelSolver(self.input_data,num_electrons=-1)
     #---------------------------------------------------------------------------
     def test_too_many_electrons(self):        
         with self.assertRaises(ValueError):
