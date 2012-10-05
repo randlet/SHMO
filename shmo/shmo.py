@@ -19,8 +19,10 @@ class HuckelSolver(object):
         data -- square input matrix representing bonds between atoms         
         num_electrons -- optional number of electrons for system.
         """
-        
-        if data is not None:
+        if data is  None:
+            self.data = None
+            self.num_electrons = 0
+        else:
             self.set_data(data,num_electrons)
     #---------------------------------------------------------------------------
     def set_data(self,data,num_electrons=None):
@@ -40,15 +42,15 @@ class HuckelSolver(object):
         self.num_electrons = num_electrons
         if num_electrons is None:
             self.num_electrons = self.data.shape[0]
-        
-        if not (0 <= self.num_electrons <= self.data.shape[0]*2):
-            raise ValueError("Number of electrons must be greater than zero and less than 2*number of atoms")
+
+        if not (0 < self.num_electrons <= self.data.shape[0]*2):
+            raise ValueError("Number of electrons(%d) must be greater than zero and less than or equal to 2*number of atoms (%d)" %(self.num_electrons,self.data.shape[0]*2))
     
         self._solve()
     #---------------------------------------------------------------------------
     def set_num_electrons(self,num_electons):
         """convenience method to update number of electrons for system"""
-        self.set_data(self.data,num_electons=num_electons)
+        self.set_data(self.data,num_electrons=num_electons)
     #---------------------------------------------------------------------------
     def _solve(self):
         """Recalculate all SHMO parameters"""
