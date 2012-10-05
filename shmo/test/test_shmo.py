@@ -39,6 +39,16 @@ class Test(unittest.TestCase):
             non_square = numpy.matrix("1 2 3; 4 5 6",dtype=numpy.float)
             solver = shmo.HuckelSolver(non_square)
     #---------------------------------------------------------------------------
+    def test_no_data(self):
+        solver = shmo.HuckelSolver()
+        self.assertEqual(0,solver.num_electrons)
+    #---------------------------------------------------------------------------
+    def test_set_num_e(self):
+        solver = shmo.HuckelSolver(self.input_data)
+        solver.set_num_electrons(4)
+        self.assertEqual(solver.num_electrons,4)
+        
+    #---------------------------------------------------------------------------
     def test_too_few_electrons(self):
         
         with self.assertRaises(ValueError):
